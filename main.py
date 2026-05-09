@@ -86,14 +86,12 @@ def main():
                 st.session_state.set_cycle_started_at = time.time()
                 st.session_state.last_saved_sets_completed = 0
                 
-                st.write(st.session_state.voice_pipeline)
                 if st.session_state.voice_pipeline:
                     result = st.session_state.voice_pipeline.process_event(
                         event="workout_started",
                         exercise=plan_exercise,
                         metrics={}
                     )
-                    st.write("RESULT:", result)
                     
                     if result:
                         st.session_state.audio_to_play, st.session_state.coach_feedback = result
@@ -208,19 +206,33 @@ def main():
             key="exercise-analysis",
             mode=WebRtcMode.SENDRECV,
             video_processor_factory=VideoProcessorClass,
-            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+            
+            rtc_configuration={
+                "iceServers": [
+                    {"urls": ["stun:stun.l.google.com:19302"]},
+                    {"urls": ["stun:stun1.l.google.com:19302"]},
+                    {"urls": ["stun:stun2.l.google.com:19302"]},
+                ]
+            },
             media_stream_constraints={
                 "video": True,
                 "audio": False
             },
-            async_processing=True
+            
+            async_processing=True,
+            
+            video_html_attrs={
+                "autoPlay": True,
+                "controls": False,
+                "muted": True,
+            },
         )
         
         sync_metrics_update(context)
         
-        if context.state.playing:
-            time.sleep(0.25)
-            st.rerun()
+        # if context.state.playing:
+        #     time.sleep(0.25)
+        #     st.rerun()
         
         inject_webrtc_styles()
     
