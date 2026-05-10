@@ -48,6 +48,7 @@ def main():
             groq_client = Groq(api_key=api_key)
             llm_coach = LLMCoach(groq_client)
             tts = TextToSpeech()
+            
             st.session_state.voice_pipeline = VoicePipeline(llm_coach, tts)
         except Exception as e:
             st.error(f"VOICE PIPELINE ERROR: {e}")
@@ -206,33 +207,20 @@ def main():
             key="exercise-analysis",
             mode=WebRtcMode.SENDRECV,
             video_processor_factory=VideoProcessorClass,
+            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
             
-            rtc_configuration={
-                "iceServers": [
-                    {"urls": ["stun:stun.l.google.com:19302"]},
-                    {"urls": ["stun:stun1.l.google.com:19302"]},
-                    {"urls": ["stun:stun2.l.google.com:19302"]},
-                ]
-            },
             media_stream_constraints={
                 "video": True,
                 "audio": False
             },
-            
-            async_processing=True,
-            
-            video_html_attrs={
-                "autoPlay": True,
-                "controls": False,
-                "muted": True,
-            },
+            async_processing=True
         )
         
         sync_metrics_update(context)
         
-        # if context.state.playing:
-        #     time.sleep(0.25)
-        #     st.rerun()
+        if context.state.playing:
+            time.sleep(0.25)
+            st.rerun()
         
         inject_webrtc_styles()
     
